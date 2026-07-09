@@ -1,0 +1,203 @@
+import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { useTheme } from '../contexts/ThemeContext'
+import { Bird, Home, LogIn, UserPlus, Settings, LogOut, Menu, X, Sun, Moon } from 'lucide-react'
+import { useState } from 'react'
+
+const Navbar = () => {
+  const { user, isAdmin, username, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
+  const location = useLocation()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
+
+  return (
+    <nav className="sticky top-0 z-50 glass border-b-0 backdrop-blur-lg transition-all duration-300">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="p-2 bg-gradient-to-br from-primary-500 to-bird-500 rounded-xl shadow-lg group-hover:shadow-primary-500/50 transition-all duration-300 transform group-hover:scale-105">
+              <Bird className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-2xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-bird-500 dark:from-primary-400 dark:to-bird-400 tracking-tight">Feathers of Mundra</span>
+          </Link>
+
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center space-x-2">
+            <Link 
+              to="/" 
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                location.pathname === '/' 
+                  ? 'text-white bg-gradient-to-r from-primary-600 to-primary-500 shadow-md shadow-primary-500/30' 
+                  : 'text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-dark-surface/50'
+              }`}
+            >
+              <Home className="h-4 w-4" />
+              <span>Home</span>
+            </Link>
+            
+            {user && isAdmin && (
+              <Link 
+                to="/admin" 
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  location.pathname === '/admin' 
+                    ? 'text-white bg-gradient-to-r from-primary-600 to-primary-500 shadow-md shadow-primary-500/30' 
+                    : 'text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-dark-surface/50'
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+                <span>Admin</span>
+              </Link>
+            )}
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-surface/50 transition-all duration-300 focus:outline-none"
+              aria-label="Toggle Theme"
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5 text-yellow-400" />}
+            </button>
+          </div>
+
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4 pl-4 border-l border-slate-200 dark:border-dark-border">
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-dark-surface px-4 py-2 rounded-xl">
+                  Welcome, <span className="text-primary-600 dark:text-primary-400">{username || user.email}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all duration-300"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Link
+                  to="/login"
+                  className="flex items-center space-x-2 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100 dark:hover:bg-dark-surface/50 rounded-xl transition-all duration-300"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span>Login</span>
+                </Link>
+                <Link
+                  to="/register"
+                  className="btn-primary text-sm flex items-center space-x-2"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  <span>Register</span>
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-surface/50"
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5 text-yellow-400" />}
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white p-2"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden glass rounded-xl mt-2 mb-4 overflow-hidden shadow-xl border border-slate-200 dark:border-dark-border">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <Link 
+                to="/" 
+                className={`flex items-center space-x-2 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  location.pathname === '/' 
+                    ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' 
+                    : 'text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-50 dark:hover:bg-dark-surface'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Home className="h-5 w-5" />
+                <span>Home</span>
+              </Link>
+              
+              {user && isAdmin && (
+                <Link 
+                  to="/admin" 
+                  className={`flex items-center space-x-2 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    location.pathname === '/admin' 
+                      ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' 
+                      : 'text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-50 dark:hover:bg-dark-surface'
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Settings className="h-5 w-5" />
+                  <span>Admin</span>
+                </Link>
+              )}
+
+              {user ? (
+                <div className="px-3 py-4 border-t border-slate-200 dark:border-dark-border mt-2">
+                  <div className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                    Welcome, <span className="font-medium text-slate-900 dark:text-white">{username || user.email}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      setIsMobileMenuOpen(false)
+                    }}
+                    className="flex w-full items-center space-x-2 px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2 p-3 border-t border-slate-200 dark:border-dark-border mt-2">
+                  <Link
+                    to="/login"
+                    className="flex items-center justify-center w-full space-x-2 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-dark-surface hover:bg-slate-200 dark:hover:bg-dark-border rounded-lg transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <LogIn className="h-5 w-5" />
+                    <span>Login</span>
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="btn-primary w-full flex items-center justify-center space-x-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    <span>Register</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  )
+}
+
+export default Navbar

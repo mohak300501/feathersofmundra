@@ -1,0 +1,13 @@
+{
+  "name": "feathers-of-mundra-functions",
+  "version": "1.0.0",
+  "description": "Netlify serverless functions for Feathers of Mundra",
+  "main": "index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "mongodb": "7.5.0"
+  }
+}

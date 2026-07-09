@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-slate-900 bg-slate-50 min-h-screen transition-colors duration-300;
+  }
+  
+  html.dark body {
+    @apply text-slate-100 bg-dark-bg min-h-screen;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(120, 24, 143, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(120, 24, 143, 0.15) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(13, 148, 136, 0.15) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  html.light body {
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(217, 70, 239, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(20, 184, 166, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(217, 70, 239, 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Classes */
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lg dark:bg-dark-surface/50 dark:border-white/10 dark:shadow-black/50 transition-all duration-300;
+  }
+  
+  .glass-card {
+    @apply glass rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-black/60;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply relative overflow-hidden bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg hover:shadow-primary-500/50 dark:focus:ring-offset-dark-bg;
+  }
+  
+  .btn-secondary {
+    @apply glass text-slate-800 dark:text-slate-200 hover:bg-white/90 dark:hover:bg-dark-surface/80 font-medium py-2.5 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:focus:ring-offset-dark-bg;
+  }
+  
+  .btn-danger {
+    @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 shadow-lg hover:shadow-red-500/50 dark:focus:ring-offset-dark-bg;
+  }
+
+  /* Form Elements */
+  .input-field {
+    @apply w-full px-4 py-3 bg-white/80 dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 text-slate-900 dark:text-slate-100 placeholder-slate-400;
+  }
+
+  /* Cards */
+  .photo-card {
+    @apply relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 bg-slate-100 dark:bg-dark-surface;
+  }
+  
+  .bird-card {
+    @apply glass-card overflow-hidden flex flex-col;
+  }
+  
+  /* Typography */
+  .section-header {
+    @apply font-display text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-bird-500 drop-shadow-sm;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-bird-500 bg-clip-text text-transparent;
+  }
+}
