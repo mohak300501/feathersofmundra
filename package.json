@@ -46,7 +46,7 @@
     "react",
     "netlify"
   ],
-  "author": "Blazing Feathers Team",
+  "author": "Mohak Ketan Patil",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"

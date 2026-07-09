@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const db = await connectToDatabase();
+    const db = await connectToDatabase(context);
     
     // Fetch the bird
     let bird;

@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const db = await connectToDatabase();
+    const db = await connectToDatabase(context);
 
     // Get user data from MongoDB
     const userDoc = await db.collection('users').findOne({ uid: userId });

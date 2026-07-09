@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const db = await connectToDatabase();
+    const db = await connectToDatabase(context);
     
     // Fetch all birds and order by commonName (or familyName depending on UI)
     const birds = await db.collection('birds').find().sort({ familyName: 1, commonName: 1 }).toArray();

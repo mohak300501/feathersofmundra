@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const db = await connectToDatabase();
+    const db = await connectToDatabase(context);
 
     // 1. Total photos
     const totalPhotos = await db.collection('photos').countDocuments();

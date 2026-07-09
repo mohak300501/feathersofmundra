@@ -2,7 +2,11 @@ const { MongoClient } = require('mongodb');
 
 let cachedDb = null;
 
-async function connectToDatabase() {
+async function connectToDatabase(context) {
+  if (context) {
+    context.callbackWaitsForEmptyEventLoop = false;
+  }
+
   if (cachedDb) {
     return cachedDb;
   }

@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const db = await connectToDatabase();
+    const db = await connectToDatabase(context);
     
     // Check if user is admin
     const userDoc = await db.collection('users').findOne({ uid: userId });
