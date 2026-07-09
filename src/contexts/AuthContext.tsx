@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUsername(data.user.username);
         setIsAdmin(!!data.user.isAdmin);
       } else {
+        console.error('Failed to sync user:', data.error, data.details || '')
         setUsername(null);
         setIsAdmin(false);
       }

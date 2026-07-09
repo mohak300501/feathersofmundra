@@ -27,7 +27,7 @@ const Home = () => {
         if (data.success && data.birds) {
           setBirds(data.birds)
         } else {
-          console.error('Failed to fetch birds')
+          console.error('Failed to fetch birds:', data.error, data.details || '')
         }
       } catch (error) {
         console.error('Error fetching birds:', error)
