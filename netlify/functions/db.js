@@ -1,3 +1,9 @@
+// Polyfill global crypto for MongoDB/BSON in serverless environments
+const { webcrypto } = require('node:crypto');
+if (typeof globalThis.crypto === 'undefined') {
+  globalThis.crypto = webcrypto;
+}
+
 const { MongoClient } = require('mongodb');
 const dns = require('dns');
 
