@@ -8,6 +8,7 @@ interface Bird {
   commonName: string
   scientificName: string
   familyName: string
+  familyDisplay: string
   photoCount: number
   featuredPhoto?: string
   commonCode: string
@@ -43,17 +44,20 @@ const Home = () => {
     bird.commonName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bird.scientificName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bird.commonCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (bird.familyName && bird.familyName.toLowerCase().includes(searchTerm.toLowerCase()))
+    (bird.familyName && bird.familyName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (bird.familyDisplay && bird.familyDisplay.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
+  const sortedFamilies: string[] = []
   const groupedBirds = filteredBirds.reduce((acc, bird) => {
-    const family = bird.familyName || 'Uncategorized'
-    if (!acc[family]) acc[family] = []
+    const family = bird.familyDisplay || bird.familyName || 'Uncategorized'
+    if (!acc[family]) {
+      acc[family] = []
+      sortedFamilies.push(family)
+    }
     acc[family].push(bird)
     return acc
   }, {} as Record<string, Bird[]>)
-
-  const sortedFamilies = Object.keys(groupedBirds).sort()
 
   if (loading) {
     return <LoadingSpinner />

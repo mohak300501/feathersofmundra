@@ -16,6 +16,8 @@ const Register = lazy(() => import('./pages/Register'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const BirdDetail = lazy(() => import('./pages/BirdDetail'))
 const AdminPanel = lazy(() => import('./pages/AdminPanel'))
+const LeaderBoard = lazy(() => import('./pages/LeaderBoard'))
+const CheckList = lazy(() => import('./pages/CheckList'))
 
 function App() {
   const { user, loading } = useAuth()
@@ -32,6 +34,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/bird/:commonCode" element={<BirdDetail />} />
+            <Route path="/leaderboard" element={<LeaderBoard />} />
+            <Route path="/checklist" element={<CheckList />} />
             <Route path="/about" element={<About />} />
             <Route path="/author" element={<Author />} />
             <Route path="/guidelines" element={<Guidelines />} />

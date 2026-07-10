@@ -43,13 +43,13 @@ const Footer = () => {
             <b>{stats.totalUsers}</b>&nbsp;Users
           </div>
         </div>
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0 w-full">
           {/* Copyright */}
           <div className="text-sm text-slate-500 dark:text-slate-400">
             © {currentYear} Mohak Ketan Patil
           </div>
           {/* Links */}
-          <div className="flex items-center space-x-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-3 md:space-y-0 md:space-x-6">
             <Link
               to="/about"
               className="text-sm text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"

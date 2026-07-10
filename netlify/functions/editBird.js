@@ -18,7 +18,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { birdId, commonName, scientificName, familyName, userId } = JSON.parse(event.body);
+    const { birdId, commonName, scientificName, familyId, userId } = JSON.parse(event.body);
 
     if (!birdId || !commonName || !scientificName || !userId) {
       return {
@@ -83,7 +83,7 @@ exports.handler = async (event, context) => {
         $set: {
           commonName: commonName.trim(),
           scientificName: scientificName.trim(),
-          familyName: familyName ? familyName.trim() : 'Uncategorized',
+          familyId: familyId || null,
           commonCode: commonCode,
           updatedAt: new Date()
         }

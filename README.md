@@ -219,3 +219,4 @@ For support, please open an issue on GitHub or contact the development team.
 - [Netlify](https://www.netlify.com/) for hosting and serverless functions
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Lucide React](https://lucide.dev/) for icons
+- [Antigravity](https://antigravity.google/) for AI refinement and debugging

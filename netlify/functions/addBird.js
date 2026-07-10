@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { commonName, scientificName, familyName, userId } = JSON.parse(event.body);
+    const { commonName, scientificName, familyId, userId } = JSON.parse(event.body);
 
     if (!commonName || !scientificName || !userId) {
       return {
@@ -71,7 +71,7 @@ exports.handler = async (event, context) => {
     const birdResult = await db.collection('birds').insertOne({
       commonName: commonName.trim(),
       scientificName: scientificName.trim(),
-      familyName: familyName ? familyName.trim() : 'Uncategorized',
+      familyId: familyId || null,
       commonCode: commonCode,
       photoCount: 0,
       createdAt: new Date(),

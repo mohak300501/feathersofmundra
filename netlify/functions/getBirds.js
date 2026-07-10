@@ -18,15 +18,57 @@ exports.handler = async (event, context) => {
   try {
     const db = await connectToDatabase(context);
     
-    // Fetch all birds and order by commonName (or familyName depending on UI)
-    const birds = await db.collection('birds').find().sort({ familyName: 1, commonName: 1 }).toArray();
+    const birds = await db.collection('birds').aggregate([
+      {
+        $addFields: {
+          familyObjectId: {
+            $convert: {
+              input: "$familyId",
+              to: "objectId",
+              onError: null,
+              onNull: null
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'families',
+          localField: 'familyObjectId',
+          foreignField: '_id',
+          as: 'family'
+        }
+      },
+      {
+        $unwind: {
+          path: '$family',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $sort: { "family.taxoPos": 1, "commonName": 1 }
+      }
+    ]).toArray();
 
-    // Map _id to id for frontend compatibility
-    const formattedBirds = birds.map(bird => ({
-      ...bird,
-      id: bird._id.toString(),
-      _id: undefined
-    }));
+    // Map _id to id for frontend compatibility and format family fields
+    const formattedBirds = birds.map(bird => {
+      const familyName = bird.family ? bird.family.familyName : 'Uncategorized';
+      const familyOfStr = bird.family && bird.family.familyOf && bird.family.familyOf.length > 0
+        ? bird.family.familyOf.join(', ')
+        : '';
+      const familyDisplay = familyOfStr ? `${familyName}: ${familyOfStr}` : familyName;
+
+      return {
+        ...bird,
+        id: bird._id.toString(),
+        familyName: familyName,
+        familyDisplay: familyDisplay,
+        taxoPos: bird.family ? bird.family.taxoPos : 9999,
+        _id: undefined,
+        family: undefined,
+        familyObjectId: undefined
+      };
+    });
 
     return {
       statusCode: 200,
