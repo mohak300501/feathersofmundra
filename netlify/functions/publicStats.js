@@ -27,13 +27,17 @@ exports.handler = async (event, context) => {
     // 3. Total users
     const totalUsers = await db.collection('users').countDocuments();
 
+    // 4. Total families
+    const totalFamilies = await db.collection('families').countDocuments();
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         totalPhotos,
         totalBirds,
-        totalUsers
+        totalUsers,
+        totalFamilies
       }),
     };
 

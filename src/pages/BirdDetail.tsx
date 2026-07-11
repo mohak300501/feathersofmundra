@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import PhotoCard from '../components/PhotoCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { Bird, Camera, MapPin, Calendar, Upload, X } from 'lucide-react'
+import { IUCN_STATUS_MAP } from '../utils/constants'
 import toast from 'react-hot-toast'
 
 interface BirdData {
@@ -11,6 +12,8 @@ interface BirdData {
   commonName: string
   scientificName: string
   photoCount: number
+  iucnStatus: string
+  isMigratory: boolean
 }
 
 interface Photo {
@@ -193,8 +196,20 @@ const BirdDetail = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary-400/10 to-bird-400/10 dark:from-primary-900/20 dark:to-bird-900/20 pointer-events-none"></div>
         <h1 className="font-display text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-bird-500 dark:from-primary-400 dark:to-bird-400 relative z-10">{bird.commonName}</h1>
         <p className="text-2xl text-slate-600 dark:text-slate-400 italic relative z-10 font-light">{bird.scientificName}</p>
-        <div className="flex items-center justify-center pt-6 relative z-10">
-          <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-5 py-2.5 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner">
+        <div className="flex flex-wrap items-center justify-center pt-6 gap-4 relative z-10">
+            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-4 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner border border-slate-200 dark:border-slate-700/50">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${IUCN_STATUS_MAP[bird.iucnStatus] ? IUCN_STATUS_MAP[bird.iucnStatus].color : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600'}`}>
+                {bird.iucnStatus}
+              </span>
+              <span className="text-sm">{IUCN_STATUS_MAP[bird.iucnStatus] ? IUCN_STATUS_MAP[bird.iucnStatus].label : 'IUCN'}</span>
+            </div>
+            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-4 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner border border-slate-200 dark:border-slate-700/50">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm ${bird.isMigratory ? 'bg-pink-500 shadow-pink-500/30' : 'bg-blue-500 shadow-blue-500/30'}`}>
+                {bird.isMigratory? 'M': 'R'}
+              </span>
+              <span className="text-sm">{bird.isMigratory ? 'Migratory' : 'Resident'}</span>
+            </div>
+          <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-5 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner">
             <Camera className="h-5 w-5 text-primary-500" />
             <span>{bird.photoCount} photo{bird.photoCount !== 1 ? 's' : ''}</span>
           </div>

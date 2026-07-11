@@ -1,10 +1,10 @@
-import { Github, ExternalLink, Bird, Camera, Users } from 'lucide-react'
+import { Github, ExternalLink, Dna, Bird, Camera, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
-  const [stats, setStats] = useState({ totalBirds: 0, totalPhotos: 0, totalUsers: 0 })
+  const [stats, setStats] = useState({ totalFamilies: 0, totalBirds: 0, totalPhotos: 0, totalUsers: 0 })
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -13,6 +13,7 @@ const Footer = () => {
         if (response.ok) {
           const data = await response.json()
           setStats({
+            totalFamilies: data.totalFamilies,
             totalBirds: data.totalBirds,
             totalPhotos: data.totalPhotos,
             totalUsers: data.totalUsers
@@ -31,6 +32,10 @@ const Footer = () => {
         {/* System Stats */}
         <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-8 mb-4">
           <div className="flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300">
+            <Dna className="h-5 w-5 text-primary-600" />
+            <b>{stats.totalFamilies}</b>&nbsp;Families
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300">
             <Bird className="h-5 w-5 text-primary-600" />
             <b>{stats.totalBirds}</b>&nbsp;Birds
           </div>
@@ -43,13 +48,13 @@ const Footer = () => {
             <b>{stats.totalUsers}</b>&nbsp;Users
           </div>
         </div>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-6 md:space-y-0 w-full">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-center space-y-6 md:space-y-0 w-full">
           {/* Copyright */}
           <div className="text-sm text-slate-500 dark:text-slate-400">
             © {currentYear} Mohak Ketan Patil
           </div>
           {/* Links */}
-          <div className="flex flex-col md:flex-row items-start md:items-center space-y-3 md:space-y-0 md:space-x-6">
+          <div className="flex flex-col md:flex-row items-center md:items-center space-y-3 md:space-y-0 md:space-x-6">
             <Link
               to="/about"
               className="text-sm text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"

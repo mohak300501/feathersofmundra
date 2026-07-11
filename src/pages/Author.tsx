@@ -8,7 +8,8 @@ const Author = () => (
             I, <b>Mohak Ketan Patil</b>, am an individual passionate about birds, nature, and their conservation.
             You may read about my contribution at my alma mater IIT Roorkee.
         </p>
-        <center><iframe src="/assets/contribution.pdf" width="100%" height="800" title="Contribution at IIT Roorkee" className="rounded-lg shadow-md border border-slate-200 dark:border-dark-border"></iframe></center>
+        <center><iframe src="/assets/contribution.pdf" width="100%" height="800" title="Contribution at IIT Roorkee" className="rounded-lg shadow-md border border-slate-200 dark:border-dark-border"></iframe></center><br/>
+        <center><iframe src="/assets/ornithology.pdf" width="100%" height="800" title="Basic Course in Ornithology" className="rounded-lg shadow-md border border-slate-200 dark:border-dark-border"></iframe></center>
     </div>
 )
 

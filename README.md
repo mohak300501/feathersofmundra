@@ -214,9 +214,9 @@ For support, please open an issue on GitHub or contact the development team.
 
 ## 💖 Acknowledgements
 
+- [Antigravity](https://antigravity.google/) for AI refinement & debugging
 - [Firebase](https://firebase.google.com/) for authentication and database
 - [Google Drive API](https://developers.google.com/drive) for file storage
 - [Netlify](https://www.netlify.com/) for hosting and serverless functions
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Lucide React](https://lucide.dev/) for icons
-- [Antigravity](https://antigravity.google/) for AI refinement and debugging

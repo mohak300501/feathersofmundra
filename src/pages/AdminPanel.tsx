@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { Bird, Plus, Trash2, Settings, Users, Camera, Edit2, X, FolderTree } from 'lucide-react'
+import { Bird, Plus, Trash2, Settings, Edit2, X, FolderTree } from 'lucide-react'
+import { IUCN_STATUS_MAP } from '../utils/constants'
 import toast from 'react-hot-toast'
 
 interface BirdData {
@@ -10,9 +11,11 @@ interface BirdData {
   scientificName: string
   familyName: string
   familyDisplay: string
-  familyId?: string
+  familyId: string
   photoCount: number
   commonCode: string
+  iucnStatus: string
+  isMigratory: boolean
 }
 
 interface FamilyData {
@@ -22,16 +25,10 @@ interface FamilyData {
   taxoPos: number
 }
 
-interface Stats {
-  totalBirds: number
-  totalPhotos: number
-}
-
 const AdminPanel = () => {
   const { user, isAdmin } = useAuth()
   const [birds, setBirds] = useState<BirdData[]>([])
   const [families, setFamilies] = useState<FamilyData[]>([])
-  const [stats, setStats] = useState<Stats>({ totalBirds: 0, totalPhotos: 0 })
   const [loading, setLoading] = useState(true)
   
   const [showAddModal, setShowAddModal] = useState(false)
@@ -56,9 +53,8 @@ const AdminPanel = () => {
 
   const fetchData = async () => {
     try {
-      const [birdsRes, statsRes, familiesRes] = await Promise.all([
+      const [birdsRes, familiesRes] = await Promise.all([
         fetch('/api/getBirds'),
-        fetch('/api/publicStats'),
         fetch('/api/getFamilies')
       ]);
 
@@ -67,18 +63,11 @@ const AdminPanel = () => {
         if (birdsData.success) setBirds(birdsData.birds);
       }
 
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        setStats({
-          totalBirds: statsData.totalBirds || 0,
-          totalPhotos: statsData.totalPhotos || 0
-        });
-      }
-
       if (familiesRes.ok) {
         const famData = await familiesRes.json();
         if (famData.success) setFamilies(famData.families);
       }
+
     } catch (error: any) {
       console.error('Error fetching admin data:', error)
       toast.error('Failed to load admin data')
@@ -87,13 +76,13 @@ const AdminPanel = () => {
     }
   }
 
-  const handleAddBird = async (commonName: string, scientificName: string, familyId: string) => {
+  const handleAddBird = async (commonName: string, scientificName: string, familyId: string, iucnStatus: string, isMigratory: boolean) => {
     setAdding(true)
     try {
       const response = await fetch('/api/addBird', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commonName, scientificName, familyId, userId: user?.uid }),
+        body: JSON.stringify({ commonName, scientificName, familyId, userId: user?.uid, iucnStatus, isMigratory }),
       })
       if (!response.ok) {
         const errorData = await response.json()
@@ -110,13 +99,13 @@ const AdminPanel = () => {
     }
   }
 
-  const handleEditBird = async (birdId: string, commonName: string, scientificName: string, familyId: string) => {
+  const handleEditBird = async (birdId: string, commonName: string, scientificName: string, familyId: string, iucnStatus: string, isMigratory: boolean) => {
     setEditing(true)
     try {
       const response = await fetch('/api/editBird', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ birdId, commonName, scientificName, familyId, userId: user?.uid }),
+        body: JSON.stringify({ birdId, commonName, scientificName, familyId, userId: user?.uid, iucnStatus, isMigratory }),
       })
       if (!response.ok) {
         const errorData = await response.json()
@@ -237,26 +226,6 @@ const AdminPanel = () => {
         <p className="text-xl text-slate-600 dark:text-slate-400">Manage birds, families and platform features</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <div className="glass-card flex items-center p-6 space-x-6">
-          <div className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-2xl">
-            <Bird className="h-10 w-10 text-primary-600 dark:text-primary-400" />
-          </div>
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">Total Species</p>
-            <h2 className="text-4xl font-display font-bold text-slate-900 dark:text-white">{stats.totalBirds}</h2>
-          </div>
-        </div>
-        <div className="glass-card flex items-center p-6 space-x-6">
-          <div className="p-4 bg-bird-100 dark:bg-bird-900/30 rounded-2xl">
-            <Camera className="h-10 w-10 text-bird-600 dark:text-bird-400" />
-          </div>
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">Total Photos</p>
-            <h2 className="text-4xl font-display font-bold text-slate-900 dark:text-white">{stats.totalPhotos}</h2>
-          </div>
-        </div>
-      </div>
 
       {/* Birds Management */}
       <div className="glass-card p-0 overflow-hidden">
@@ -372,16 +341,18 @@ const AdminPanel = () => {
   )
 }
 
-interface AddBirdModalProps { onClose: () => void; onAdd: (cn: string, sn: string, fid: string) => Promise<void>; adding: boolean; families: FamilyData[] }
+interface AddBirdModalProps { onClose: () => void; onAdd: (cn: string, sn: string, fid: string, iucn: string, isMig: boolean) => Promise<void>; adding: boolean; families: FamilyData[] }
 const AddBirdModal = ({ onClose, onAdd, adding, families }: AddBirdModalProps) => {
   const [commonName, setCommonName] = useState('')
   const [scientificName, setScientificName] = useState('')
   const [familyId, setFamilyId] = useState('')
+  const [iucnStatus, setIucnStatus] = useState('LC')
+  const [isMigratory, setIsMigratory] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!commonName || !scientificName) { toast.error('Please fill required fields'); return; }
-    await onAdd(commonName, scientificName, familyId)
+    await onAdd(commonName, scientificName, familyId, iucnStatus, isMigratory)
   }
 
   return (
@@ -407,6 +378,21 @@ const AddBirdModal = ({ onClose, onAdd, adding, families }: AddBirdModalProps) =
               {families.map(f => <option key={f.id} value={f.id}>{f.familyName}</option>)}
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">IUCN Status *</label>
+            <select value={iucnStatus} onChange={(e) => setIucnStatus(e.target.value)} className="input-field" required>
+              {Object.entries(IUCN_STATUS_MAP).map(([code, { label }]) => (
+                <option key={code} value={code}>{label} ({code})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Migratory Status *</label>
+            <select value={isMigratory ? "true" : "false"} onChange={(e) => setIsMigratory(e.target.value === "true")} className="input-field" required>
+              <option value="false">Resident</option>
+              <option value="true">Migratory</option>
+            </select>
+          </div>
           <div className="flex space-x-4 pt-4">
             <button type="button" onClick={onClose} className="btn-secondary flex-1" disabled={adding}>Cancel</button>
             <button type="submit" disabled={adding} className="btn-primary flex-1">{adding ? 'Adding...' : 'Add Bird'}</button>
@@ -417,18 +403,20 @@ const AddBirdModal = ({ onClose, onAdd, adding, families }: AddBirdModalProps) =
   )
 }
 
-interface EditBirdModalProps { bird: BirdData; onClose: () => void; onEdit: (id: string, cn: string, sn: string, fid: string) => Promise<void>; editing: boolean; families: FamilyData[] }
+interface EditBirdModalProps { bird: BirdData; onClose: () => void; onEdit: (id: string, cn: string, sn: string, fid: string, iucn: string, isMig: boolean) => Promise<void>; editing: boolean; families: FamilyData[] }
 const EditBirdModal = ({ bird, onClose, onEdit, editing, families }: EditBirdModalProps) => {
   const [commonName, setCommonName] = useState(bird.commonName)
   const [scientificName, setScientificName] = useState(bird.scientificName)
   // Determine initial familyId from families array if not directly available (migration fallback)
   const initialFamId = bird.familyId || families.find(f => f.familyName === bird.familyName)?.id || ''
   const [familyId, setFamilyId] = useState(initialFamId)
+  const [iucnStatus, setIucnStatus] = useState(bird.iucnStatus || 'LC')
+  const [isMigratory, setIsMigratory] = useState(bird.isMigratory || false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!commonName || !scientificName) { toast.error('Please fill required fields'); return; }
-    await onEdit(bird.id, commonName, scientificName, familyId)
+    await onEdit(bird.id, commonName, scientificName, familyId, iucnStatus, isMigratory)
   }
 
   return (
@@ -452,6 +440,21 @@ const EditBirdModal = ({ bird, onClose, onEdit, editing, families }: EditBirdMod
             <select value={familyId} onChange={(e) => setFamilyId(e.target.value)} className="input-field" required>
               <option value="">Select a family...</option>
               {families.map(f => <option key={f.id} value={f.id}>{f.familyName}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">IUCN Status *</label>
+            <select value={iucnStatus} onChange={(e) => setIucnStatus(e.target.value)} className="input-field" required>
+              {Object.entries(IUCN_STATUS_MAP).map(([code, { label }]) => (
+                <option key={code} value={code}>{label} ({code})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Migratory Status *</label>
+            <select value={isMigratory ? "true" : "false"} onChange={(e) => setIsMigratory(e.target.value === "true")} className="input-field" required>
+              <option value="false">Resident</option>
+              <option value="true">Migratory</option>
             </select>
           </div>
           <div className="flex space-x-4 pt-4">

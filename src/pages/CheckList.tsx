@@ -38,7 +38,7 @@ const CheckList = () => {
 
   const sortedFamilies: string[] = []
   const groupedBirds = birds.reduce((acc, bird) => {
-    const family = bird.familyDisplay || bird.familyName || 'Uncategorized'
+    const family = bird.familyName
     if (!acc[family]) {
       acc[family] = []
       sortedFamilies.push(family)
@@ -92,7 +92,7 @@ const CheckList = () => {
                         {bird.commonName}
                       </span>
                       <span className="text-slate-500 dark:text-slate-400 italic text-sm">
-                        ({bird.scientificName})
+                        {bird.scientificName}
                       </span>
                     </li>
                   ))}

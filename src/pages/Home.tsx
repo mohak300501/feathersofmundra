@@ -1,7 +1,33 @@
 import { useState, useEffect } from 'react'
 import BirdCard from '../components/BirdCard'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { Search, Bird } from 'lucide-react'
+import { Search, Bird, Camera, Users, Dna, Info } from 'lucide-react'
+import { IUCN_STATUS_MAP } from '../utils/constants'
+
+const AnimatedCounter = ({ target }: { target: number }) => {
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    if (!target) return;
+    let start = 0;
+    const duration = 2000;
+    const increment = Math.max(target / (duration / 16), 1); // 60fps
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(timer);
+  }, [target]);
+
+  return <span>{count}</span>
+}
 
 interface Bird {
   id: string
@@ -12,12 +38,22 @@ interface Bird {
   photoCount: number
   featuredPhoto?: string
   commonCode: string
+  iucnStatus: string
+  isMigratory: boolean
+}
+
+interface Stats {
+  totalFamilies: number
+  totalBirds: number
+  totalPhotos: number
+  totalUsers: number
 }
 
 const Home = () => {
   const [birds, setBirds] = useState<Bird[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [stats, setStats] = useState<Stats | null>(null)
 
   useEffect(() => {
     const fetchBirds = async () => {
@@ -37,15 +73,27 @@ const Home = () => {
       }
     }
 
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/publicStats');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data)
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      }
+    }
+
     fetchBirds()
+    fetchStats()
   }, [])
 
   const filteredBirds = birds.filter(bird =>
     bird.commonName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bird.scientificName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     bird.commonCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (bird.familyName && bird.familyName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (bird.familyDisplay && bird.familyDisplay.toLowerCase().includes(searchTerm.toLowerCase()))
+    bird.familyDisplay && bird.familyDisplay.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const sortedFamilies: string[] = []
@@ -71,9 +119,54 @@ const Home = () => {
           Feathers of Mundra
         </h1>
         <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-medium">
-          Discover the beauty of birds through stunning photography from the Mundra region
+          Discover the beauty of birds through stunning photography from Mundra
         </p>
       </div>
+
+      {/* Stats Section */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto px-4">
+          <div className="glass-card flex flex-col items-center justify-center p-6 text-center hover:-translate-y-1 transition-transform">
+            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-3">
+              <Dna className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white mb-1">
+              <AnimatedCounter target={stats.totalFamilies} />
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Families</p>
+          </div>
+          
+          <div className="glass-card flex flex-col items-center justify-center p-6 text-center hover:-translate-y-1 transition-transform">
+            <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-3">
+              <Bird className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+            </div>
+            <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white mb-1">
+              <AnimatedCounter target={stats.totalBirds} />
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Birds</p>
+          </div>
+
+          <div className="glass-card flex flex-col items-center justify-center p-6 text-center hover:-translate-y-1 transition-transform">
+            <div className="p-3 bg-bird-100 dark:bg-bird-900/30 rounded-full mb-3">
+              <Camera className="h-8 w-8 text-bird-600 dark:text-bird-400" />
+            </div>
+            <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white mb-1">
+              <AnimatedCounter target={stats.totalPhotos} />
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Photos</p>
+          </div>
+
+          <div className="glass-card flex flex-col items-center justify-center p-6 text-center hover:-translate-y-1 transition-transform">
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-3">
+              <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h2 className="text-3xl font-display font-bold text-slate-900 dark:text-white mb-1">
+              <AnimatedCounter target={stats.totalUsers} />
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Users</p>
+          </div>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="max-w-xl mx-auto relative group">
@@ -123,6 +216,8 @@ const Home = () => {
                     photoCount={bird.photoCount}
                     featuredPhoto={bird.featuredPhoto}
                     commonCode={bird.commonCode}
+                    iucnStatus={bird.iucnStatus}
+                    isMigratory={bird.isMigratory}
                   />
                 ))}
               </div>
@@ -131,11 +226,44 @@ const Home = () => {
         </div>
       )}
 
-      {/* Stats */}
-      <div className="text-center pt-10 pb-6 border-t border-slate-200 dark:border-dark-border">
-        <p className="text-slate-500 dark:text-slate-400 font-medium bg-slate-100 dark:bg-dark-surface px-6 py-2 rounded-full inline-block shadow-inner">
-          Showing {filteredBirds.length} species
-        </p>
+      {/* Legend */}
+      <div className="glass-card max-w-4xl mx-auto p-6 mt-16 flex flex-col items-center justify-center gap-6 text-sm">
+        <div className="flex items-center gap-2 mb-2">
+          <Info className="h-5 w-5 text-slate-400" />
+          <span className="text-slate-600 dark:text-slate-300 font-medium text-base">Legend</span>
+        </div>
+        
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 w-full">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {Object.entries(IUCN_STATUS_MAP).map(([code, { label, color }]) => (
+              <div key={code} className="flex items-center gap-2">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${color}`}>
+                  {code}
+                </div>
+                <span className="text-slate-600 dark:text-slate-400 text-xs whitespace-nowrap">{label}</span>
+              </div>
+            ))}
+          </div>
+          
+          <div className="w-px h-8 bg-slate-200 dark:bg-dark-border hidden lg:block"></div>
+          <div className="h-px w-full bg-slate-200 dark:bg-dark-border block lg:hidden"></div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-pink-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm shadow-pink-500/30">
+                M
+              </div>
+              <span className="text-slate-600 dark:text-slate-400 text-xs whitespace-nowrap">Migratory</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm shadow-blue-500/30">
+                R
+              </div>
+              <span className="text-slate-600 dark:text-slate-400 text-xs whitespace-nowrap">Resident</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

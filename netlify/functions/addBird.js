@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { commonName, scientificName, familyId, userId } = JSON.parse(event.body);
+    const { commonName, scientificName, familyId, userId, iucnStatus, isMigratory } = JSON.parse(event.body);
 
     if (!commonName || !scientificName || !userId) {
       return {
@@ -74,6 +74,8 @@ exports.handler = async (event, context) => {
       familyId: familyId || null,
       commonCode: commonCode,
       photoCount: 0,
+      iucnStatus: iucnStatus || 'LC',
+      isMigratory: Boolean(isMigratory),
       createdAt: new Date(),
       addedBy: userId // Referencing user by UID
     });
