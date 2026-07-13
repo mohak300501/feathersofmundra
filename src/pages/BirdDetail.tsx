@@ -42,11 +42,11 @@ const BirdDetail = () => {
       if (!commonCode) return
 
       try {
-        const response = await fetch(`/api/getBird?commonCode=${commonCode}`)
+        const response = await fetch(`/api/Bird/getBird?commonCode=${commonCode}`)
 
         if (response.status === 404) {
           // Fallback to fetch by ID if commonCode fails
-          const idResponse = await fetch(`/api/getBird?id=${commonCode}`)
+          const idResponse = await fetch(`/api/Bird/getBird?id=${commonCode}`)
           if (idResponse.ok) {
             const data = await idResponse.json()
             setBird(data.bird)
@@ -77,7 +77,7 @@ const BirdDetail = () => {
 
   const handlePhotoDelete = async (photoId: string) => {
     try {
-      const response = await fetch('/api/deletePhoto', {
+      const response = await fetch('/api/Bird/deletePhoto', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ const BirdDetail = () => {
 
   const handleSetFeatured = async (fileId: string) => {
     try {
-      const response = await fetch('/api/setFeaturedPhoto', {
+      const response = await fetch('/api/Bird/setFeaturedPhoto', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ const BirdDetail = () => {
 
   const handleEditPhotoSubmit = async (photoId: string, location: string, dateOfCapture: string) => {
     try {
-      const response = await fetch('/api/editPhotoInfo', {
+      const response = await fetch('/api/Bird/editPhotoInfo', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoId, userId: user?.uid, location, dateOfCapture })
@@ -149,7 +149,7 @@ const BirdDetail = () => {
 
   const handleSwitchSpeciesSubmit = async (photoId: string, newBirdId: string) => {
     try {
-      const response = await fetch('/api/switchPhotoSpecies', {
+      const response = await fetch('/api/Bird/switchPhotoSpecies', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoId, userId: user?.uid, oldBirdId: bird?.id, newBirdId })
@@ -191,7 +191,7 @@ const BirdDetail = () => {
         reader.readAsDataURL(file)
       })
 
-      const response = await fetch('/api/addPhoto', {
+      const response = await fetch('/api/Bird/addBirdPhoto', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -557,7 +557,7 @@ const SwitchSpeciesModal = ({ photo, onClose, onSwitch }: SwitchSpeciesModalProp
   useEffect(() => {
     const fetchBirds = async () => {
       try {
-        const response = await fetch('/api/getBirds')
+        const response = await fetch('/api/Bird/getBirds')
         if (response.ok) {
           const data = await response.json()
           setBirds(data.birds || [])

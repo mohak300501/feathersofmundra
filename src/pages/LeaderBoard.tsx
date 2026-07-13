@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { Trophy, Medal, Camera, Star } from 'lucide-react'
+import { Trophy, Medal, Camera } from 'lucide-react'
 
 interface Leader {
   userId: string
@@ -15,7 +15,7 @@ const LeaderBoard = () => {
   useEffect(() => {
     const fetchLeaders = async () => {
       try {
-        const response = await fetch('/api/leaderBoard')
+        const response = await fetch('/api/General/leaderBoard')
         const data = await response.json()
         
         if (data.success && data.leaders) {
@@ -78,7 +78,7 @@ const LeaderBoard = () => {
                 </div>
                 <div className="glass-card w-full text-center p-6 bg-gradient-to-b from-white/80 to-slate-100/80 dark:from-dark-surface/80 dark:to-slate-800/80 transform transition hover:-translate-y-2 duration-300">
                   <h3 className="font-bold text-xl text-slate-800 dark:text-slate-200 truncate w-full">{top3[1].username}</h3>
-                  <div className="mt-2 flex items-center justify-center space-x-1.5 text-primary-600 dark:text-primary-400 font-semibold">
+                  <div className="mt-2 flex items-center justify-center space-x-1.5 text-slate-600 dark:text-slate-300 font-semibold">
                     <Camera className="h-4 w-4" />
                     <span>{top3[1].count} Photos</span>
                   </div>

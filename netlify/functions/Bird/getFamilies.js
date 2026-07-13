@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
 
   try {
     const db = await connectToDatabase(context);
-    
+
     // Fetch all families and order by taxonomic position
     const families = await db.collection('families').find().sort({ taxoPos: 1 }).toArray();
 

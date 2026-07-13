@@ -48,7 +48,7 @@ const SignUp = () => {
     setLoading(true)
     try {
       // Check if username is already taken
-      const checkRes = await fetch('/api/checkUsername', {
+      const checkRes = await fetch('/api/General/checkUsername', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username })

@@ -26,7 +26,7 @@ const Login = () => {
 
       // Check if identifier is not an email
       if (!identifier.includes('@')) {
-        const res = await fetch('/api/getEmailByUsername', {
+        const res = await fetch('/api/General/getEmailByUsername', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: identifier })

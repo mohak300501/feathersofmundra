@@ -1,5 +1,5 @@
-const { connectToDatabase } = require('./db');
-const { generateUniqueCommonCode } = require('./commonCode');
+const { connectToDatabase } = require('../General/db');
+const { generateUniqueCommonCode } = require('../General/commonCode');
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
+
     // Check if user is admin
     const userDoc = await db.collection('users').findOne({ uid: userId });
     if (!userDoc) {
@@ -48,8 +48,8 @@ exports.handler = async (event, context) => {
     }
 
     // Check if bird already exists (case-insensitive)
-    const existingBird = await db.collection('birds').findOne({ 
-      commonName: { $regex: new RegExp(`^${commonName}$`, 'i') } 
+    const existingBird = await db.collection('birds').findOne({
+      commonName: { $regex: new RegExp(`^${commonName}$`, 'i') }
     });
 
     if (existingBird) {

@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const syncUserWithBackend = async (firebaseUser: User, customUsername?: string, customWhatsapp?: string) => {
     try {
-      const response = await fetch('/api/syncUser', {
+      const response = await fetch('/api/General/syncUser', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -150,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) throw new Error('Not authenticated')
 
     try {
-      const response = await fetch('/api/updateProfile', {
+      const response = await fetch('/api/General/updateProfile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -19,6 +19,8 @@ const AdminPanel = lazy(() => import('./pages/AdminPanel'))
 const LeaderBoard = lazy(() => import('./pages/LeaderBoard'))
 const CheckList = lazy(() => import('./pages/CheckList'))
 const Profile = lazy(() => import('./pages/Profile'))
+const Workshops = lazy(() => import('./pages/Workshops'))
+const WorkshopDetail = lazy(() => import('./pages/WorkshopDetail'))
 
 function App() {
   const { user, loading } = useAuth()
@@ -34,6 +36,8 @@ function App() {
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/workshops" element={<Workshops />} />
+            <Route path="/workshop/:workshopCode" element={<WorkshopDetail />} />
             <Route path="/bird/:commonCode" element={<BirdDetail />} />
             <Route path="/leaderboard" element={<LeaderBoard />} />
             <Route path="/checklist" element={<CheckList />} />

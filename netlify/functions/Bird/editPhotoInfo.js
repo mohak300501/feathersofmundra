@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 const { ObjectId } = require('mongodb');
 
 exports.handler = async (event, context) => {
@@ -64,12 +64,12 @@ exports.handler = async (event, context) => {
     // Update the photo
     await db.collection('photos').updateOne(
       { _id: photoObjectId },
-      { 
-        $set: { 
-          location, 
+      {
+        $set: {
+          location,
           dateOfCapture: new Date(dateOfCapture),
           updatedAt: new Date()
-        } 
+        }
       }
     );
 

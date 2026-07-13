@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 const { ObjectId } = require('mongodb');
 const google = require('googleapis');
 
@@ -29,7 +29,7 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
+
     // Check if user is admin
     const userDoc = await db.collection('users').findOne({ uid: userId });
     if (!userDoc || !userDoc.isAdmin) {
@@ -73,7 +73,7 @@ exports.handler = async (event, context) => {
         }
       }
     }
-    
+
     // Delete all photos from MongoDB
     await db.collection('photos').deleteMany({ birdId: birdObjectId });
 

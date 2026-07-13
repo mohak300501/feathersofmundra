@@ -1,6 +1,6 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 const { ObjectId } = require('mongodb');
-const { generateUniqueCommonCode } = require('./commonCode');
+const { generateUniqueCommonCode } = require('../General/commonCode');
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -29,7 +29,7 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
+
     // Check if user is admin
     const userDoc = await db.collection('users').findOne({ uid: userId });
     if (!userDoc || !userDoc.isAdmin) {
@@ -41,7 +41,7 @@ exports.handler = async (event, context) => {
     }
 
     const birdObjectId = new ObjectId(birdId);
-    
+
     // Get existing bird
     const existingBird = await db.collection('birds').findOne({ _id: birdObjectId });
     if (!existingBird) {
@@ -57,7 +57,7 @@ exports.handler = async (event, context) => {
     // Check if commonName has changed
     if (existingBird.commonName.toLowerCase() !== commonName.trim().toLowerCase()) {
       // Check for name collision
-      const nameCollision = await db.collection('birds').findOne({ 
+      const nameCollision = await db.collection('birds').findOne({
         commonName: { $regex: new RegExp(`^${commonName.trim()}$`, 'i') },
         _id: { $ne: birdObjectId }
       });
@@ -79,7 +79,7 @@ exports.handler = async (event, context) => {
     // Update the bird
     await db.collection('birds').updateOne(
       { _id: birdObjectId },
-      { 
+      {
         $set: {
           commonName: commonName.trim(),
           scientificName: scientificName.trim(),

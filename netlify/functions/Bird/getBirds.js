@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -17,7 +17,7 @@ exports.handler = async (event, context) => {
 
   try {
     const db = await connectToDatabase(context);
-    
+
     const birds = await db.collection('birds').aggregate([
       {
         $addFields: {

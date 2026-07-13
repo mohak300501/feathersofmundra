@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
+
     // Check if user is admin
     const userDoc = await db.collection('users').findOne({ uid: userId });
     if (!userDoc || !userDoc.isAdmin) {
@@ -39,8 +39,8 @@ exports.handler = async (event, context) => {
     }
 
     // Check if family already exists
-    const existingFamily = await db.collection('families').findOne({ 
-      familyName: { $regex: new RegExp(`^${familyName.trim()}$`, 'i') } 
+    const existingFamily = await db.collection('families').findOne({
+      familyName: { $regex: new RegExp(`^${familyName.trim()}$`, 'i') }
     });
 
     if (existingFamily) {
@@ -52,7 +52,7 @@ exports.handler = async (event, context) => {
     }
 
     // Convert comma separated string to array of strings
-    const familyOfArray = typeof familyOf === 'string' 
+    const familyOfArray = typeof familyOf === 'string'
       ? familyOf.split(',').map(s => s.trim()).filter(Boolean)
       : Array.isArray(familyOf) ? familyOf : [];
 

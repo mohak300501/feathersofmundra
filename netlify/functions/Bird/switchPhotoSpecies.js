@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 const { ObjectId } = require('mongodb');
 
 exports.handler = async (event, context) => {
@@ -66,28 +66,28 @@ exports.handler = async (event, context) => {
     // Check if new bird exists
     const newBirdDoc = await db.collection('birds').findOne({ _id: newBirdObjectId });
     if (!newBirdDoc) {
-        return {
-          statusCode: 404,
-          headers,
-          body: JSON.stringify({ error: 'Target bird not found' }),
-        };
+      return {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({ error: 'Target bird not found' }),
+      };
     }
 
     // Move the photo to the new bird
     await db.collection('photos').updateOne(
       { _id: photoObjectId },
-      { 
-          $set: { 
-              birdId: newBirdObjectId,
-              updatedAt: new Date()
-          } 
+      {
+        $set: {
+          birdId: newBirdObjectId,
+          updatedAt: new Date()
+        }
       }
     );
 
     // Update photo count and featured photo for old bird
     const oldBirdDoc = await db.collection('birds').findOne({ _id: oldBirdObjectId });
     const oldUpdateQuery = { $inc: { photoCount: -1 } };
-    
+
     if (oldBirdDoc && oldBirdDoc.featuredPhoto === photoDoc.fileId) {
       // Pick a new featured photo
       const latestPhoto = await db.collection('photos')
@@ -95,7 +95,7 @@ exports.handler = async (event, context) => {
         .sort({ addedAt: -1 }) // user changed this in getBird.js to addedAt
         .limit(1)
         .toArray();
-        
+
       if (latestPhoto.length > 0) {
         oldUpdateQuery.$set = { featuredPhoto: latestPhoto[0].fileId };
       } else {
@@ -107,7 +107,7 @@ exports.handler = async (event, context) => {
     // Update photo count and potentially featured photo for new bird
     const newUpdateQuery = { $inc: { photoCount: 1 } };
     if (!newBirdDoc.featuredPhoto) {
-        newUpdateQuery.$set = { featuredPhoto: photoDoc.fileId };
+      newUpdateQuery.$set = { featuredPhoto: photoDoc.fileId };
     }
     await db.collection('birds').updateOne({ _id: newBirdObjectId }, newUpdateQuery);
 

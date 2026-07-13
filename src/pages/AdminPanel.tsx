@@ -54,8 +54,8 @@ const AdminPanel = () => {
   const fetchData = async () => {
     try {
       const [birdsRes, familiesRes] = await Promise.all([
-        fetch('/api/getBirds'),
-        fetch('/api/getFamilies')
+        fetch('/api/Bird/getBirds'),
+        fetch('/api/Bird/getFamilies')
       ]);
 
       if (birdsRes.ok) {
@@ -79,7 +79,7 @@ const AdminPanel = () => {
   const handleAddBird = async (commonName: string, scientificName: string, familyId: string, iucnStatus: string, isMigratory: boolean) => {
     setAdding(true)
     try {
-      const response = await fetch('/api/addBird', {
+      const response = await fetch('/api/Bird/addBird', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ commonName, scientificName, familyId, userId: user?.uid, iucnStatus, isMigratory }),
@@ -102,7 +102,7 @@ const AdminPanel = () => {
   const handleEditBird = async (birdId: string, commonName: string, scientificName: string, familyId: string, iucnStatus: string, isMigratory: boolean) => {
     setEditing(true)
     try {
-      const response = await fetch('/api/editBird', {
+      const response = await fetch('/api/Bird/editBird', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ birdId, commonName, scientificName, familyId, userId: user?.uid, iucnStatus, isMigratory }),
@@ -125,7 +125,7 @@ const AdminPanel = () => {
   const handleDeleteBird = async (birdId: string, birdName: string) => {
     if (!window.confirm(`Are you sure you want to delete "${birdName}"? This will also delete all associated photos.`)) return;
     try {
-      const response = await fetch('/api/deleteBird', {
+      const response = await fetch('/api/Bird/deleteBird', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ birdId, userId: user?.uid }),
@@ -142,7 +142,7 @@ const AdminPanel = () => {
   const handleAddFamily = async (familyName: string, familyOf: string, taxoPos: number) => {
     setAddingFamily(true)
     try {
-      const response = await fetch('/api/addFamily', {
+      const response = await fetch('/api/Bird/addFamily', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ familyName, familyOf, taxoPos, userId: user?.uid }),
@@ -165,7 +165,7 @@ const AdminPanel = () => {
   const handleEditFamily = async (familyId: string, familyName: string, familyOf: string, taxoPos: number) => {
     setEditingFamilyLoading(true)
     try {
-      const response = await fetch('/api/editFamily', {
+      const response = await fetch('/api/Bird/editFamily', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ familyId, familyName, familyOf, taxoPos, userId: user?.uid }),
@@ -188,7 +188,7 @@ const AdminPanel = () => {
   const handleDeleteFamily = async (familyId: string, familyName: string) => {
     if (!window.confirm(`Are you sure you want to delete family "${familyName}"?`)) return;
     try {
-      const response = await fetch('/api/deleteFamily', {
+      const response = await fetch('/api/Bird/deleteFamily', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ familyId, userId: user?.uid }),

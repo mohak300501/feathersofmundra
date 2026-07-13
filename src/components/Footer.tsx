@@ -9,7 +9,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/publicStats')
+        const response = await fetch('/api/General/publicStats')
         if (response.ok) {
           const data = await response.json()
           setStats({

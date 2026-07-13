@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 const { ObjectId } = require('mongodb');
 
 exports.handler = async (event, context) => {
@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
+
     const userDoc = await db.collection('users').findOne({ uid: userId });
     if (!userDoc || !userDoc.isAdmin) {
       return {

@@ -1,4 +1,4 @@
-const { connectToDatabase } = require('./db');
+const { connectToDatabase } = require('../General/db');
 const { ObjectId } = require('mongodb');
 
 exports.handler = async (event, context) => {
@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
+
     const userDoc = await db.collection('users').findOne({ uid: userId });
     if (!userDoc || !userDoc.isAdmin) {
       return {
@@ -39,7 +39,7 @@ exports.handler = async (event, context) => {
     }
 
     const familyObjectId = new ObjectId(familyId);
-    
+
     const existingFamily = await db.collection('families').findOne({ _id: familyObjectId });
     if (!existingFamily) {
       return {
@@ -51,7 +51,7 @@ exports.handler = async (event, context) => {
 
     // Check for name collision
     if (existingFamily.familyName.toLowerCase() !== familyName.trim().toLowerCase()) {
-      const nameCollision = await db.collection('families').findOne({ 
+      const nameCollision = await db.collection('families').findOne({
         familyName: { $regex: new RegExp(`^${familyName.trim()}$`, 'i') },
         _id: { $ne: familyObjectId }
       });
@@ -65,13 +65,13 @@ exports.handler = async (event, context) => {
       }
     }
 
-    const familyOfArray = typeof familyOf === 'string' 
+    const familyOfArray = typeof familyOf === 'string'
       ? familyOf.split(',').map(s => s.trim()).filter(Boolean)
       : Array.isArray(familyOf) ? familyOf : [];
 
     await db.collection('families').updateOne(
       { _id: familyObjectId },
-      { 
+      {
         $set: {
           familyName: familyName.trim(),
           familyOf: familyOfArray,

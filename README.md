@@ -16,11 +16,13 @@ A beautiful, modern web application for bird photography enthusiasts. Built with
 
 - 🎨 **Premium UI**: Modern glassmorphic design, dynamic animations, and dark mode support
 - 🔐 **Authentication**: Firebase Auth with email verification
-- 🐦 **Bird Gallery**: Browse and search through bird species with real-time data from MongoDB
+- 🐦 **Bird Directory & Checklists**: Browse and search through bird species with real-time data, complete with IUCN status, migratory tracking, and hierarchical family checklists.
 - 📸 **Photo Upload**: Members can upload photos with location and date
-- 👑 **Admin Panel**: Manage birds and view system statistics
+- 🏕️ **Workshops & Galleries**: Discover local birdwatching workshops, register for events, and share experiences in the Workshop Gallery.
+- 👑 **Admin Panel**: Manage birds, workshops, families, and view system statistics
+- 🏆 **Community Leaderboard**: Track active photographers and contributors
 - 🗂️ **Google Drive Integration**: Photos stored safely in a shared Google Drive folder
-- 🚀 **Serverless Functions**: Netlify functions for secure backend API routes
+- 🚀 **Serverless Functions**: Modular, categorized Netlify functions (`Bird/`, `Workshop/`, `General/`) for secure backend API routes
 - 📱 **Responsive Design**: Beautiful UI that works on all devices
 
 ---
@@ -140,7 +142,10 @@ feathersofmundra/
 │   ├── App.tsx             # Main app component
 │   └── main.tsx            # App entry point
 ├── netlify/
-│   └── functions/          # Serverless functions 
+│   └── functions/          # Serverless functions
+│       ├── Bird/           # Bird & Family related APIs
+│       ├── Workshop/       # Workshop & Gallery APIs
+│       └── General/        # User, Auth & Utility APIs
 ├── public/                 # Static assets
 ├── package.json            # Dependencies
 ├── netlify.toml            # Netlify configuration
@@ -158,19 +163,28 @@ feathersofmundra/
 - Admin role checking
 
 ### 🐦 Bird Management
-- Public bird gallery with search
-- Admin-only bird addition/deletion
+- Public bird gallery with search, IUCN statuses, and migratory tracking
+- Hierarchical family checklists
+- Admin-only bird addition/deletion/editing
 - Bird details with photo galleries
 
 ### 📸 Photo Management
 - Upload photos with location and date
-- High-quality image display
+- High-quality image display with lazy loading
+- Switch photo species or edit metadata
 - Delete permissions (owner or admin)
 - Automatic Google Drive integration
 
+### 🏕️ Workshops
+- Browse upcoming birdwatching workshops
+- Secure registration with capacity management
+- Interactive workshop photo gallery for experiences
+- Admin tools for creating and editing workshops
+
 ### 👑 Admin Features
-- Add/delete bird species
-- Delete any photo
+- Add/delete bird species and families
+- Create and edit workshops
+- Delete any photo or workshop
 - View system statistics
 - User management
 

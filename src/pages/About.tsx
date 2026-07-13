@@ -17,10 +17,12 @@ const About = () => (
     <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
       <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Features & Functionalities</h2>
       <ul className="list-disc pl-5 space-y-2 text-slate-800 dark:text-slate-200">
-        <li><b>Bird Directory:</b> A comprehensive database of bird species found in Mundra, complete with detailed descriptions and IUCN conservation status.</li>
-        <li><b>Photo Submissions:</b> SignUped users can contribute their own bird photographs to the community.</li>
-        <li><b>User Profiles:</b> Manage your account, track your submissions, and appear on our community Leaderboard.</li>
-        <li><b>Admin Moderation:</b> Dedicated admin tools for reviewing submissions, managing species data, and maintaining the platform's quality.</li>
+        <li><b>Bird Directory:</b> A comprehensive database of bird species found in Mundra, complete with detailed descriptions, IUCN conservation status, and migratory tracking.</li>
+        <li><b>Bird Checklists & Leaderboards:</b> Explore hierarchical checklists of bird families and species, and compete on the community Leaderboard.</li>
+        <li><b>Photo Submissions:</b> Signed-up users can contribute their own bird photographs to the community database.</li>
+        <li><b>Workshops & Galleries:</b> Discover and register for local birdwatching workshops. Share your experiences and workshop photos in the interactive Workshop Gallery.</li>
+        <li><b>User Profiles:</b> Manage your account, track your submissions, and view your impact.</li>
+        <li><b>Admin Moderation:</b> Dedicated admin tools for reviewing submissions, managing species data, workshops, and maintaining the platform's quality.</li>
       </ul>
     </div>
 
