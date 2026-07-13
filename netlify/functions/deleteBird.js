@@ -61,14 +61,15 @@ exports.handler = async (event, context) => {
 
     // Delete photos from Google Drive and MongoDB
     for (const photo of photos) {
-      if (photo.driveFileId) {
+      const fileIdToDelete = photo.fileId;
+      if (fileIdToDelete) {
         try {
           await drive.files.delete({
-            fileId: photo.driveFileId,
+            fileId: fileIdToDelete,
             supportsAllDrives: true,
           });
         } catch (error) {
-          console.error(`Error deleting file ${photo.driveFileId} from Drive:`, error);
+          console.error(`Error deleting file ${fileIdToDelete} from Drive:`, error);
         }
       }
     }

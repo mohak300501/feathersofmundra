@@ -71,13 +71,11 @@ exports.handler = async (event, context) => {
     const birdResult = await db.collection('birds').insertOne({
       commonName: commonName.trim(),
       scientificName: scientificName.trim(),
-      familyId: familyId || null,
+      familyId: familyId,
       commonCode: commonCode,
       photoCount: 0,
-      iucnStatus: iucnStatus || 'LC',
-      isMigratory: Boolean(isMigratory),
-      createdAt: new Date(),
-      addedBy: userId // Referencing user by UID
+      iucnStatus: iucnStatus,
+      isMigratory: Boolean(isMigratory)
     });
 
     return {

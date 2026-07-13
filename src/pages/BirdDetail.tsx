@@ -21,8 +21,9 @@ interface Photo {
   url: string
   location: string
   dateOfCapture: Date
-  uploadedBy: string
-  uploadedByUsername: string
+  fileId: string
+  userId: string
+  username: string
 }
 
 const BirdDetail = () => {
@@ -33,6 +34,8 @@ const BirdDetail = () => {
   const [loading, setLoading] = useState(true)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null)
+  const [switchingPhoto, setSwitchingPhoto] = useState<Photo | null>(null)
 
   useEffect(() => {
     const fetchBirdData = async () => {
@@ -40,7 +43,7 @@ const BirdDetail = () => {
 
       try {
         const response = await fetch(`/api/getBird?commonCode=${commonCode}`)
-        
+
         if (response.status === 404) {
           // Fallback to fetch by ID if commonCode fails
           const idResponse = await fetch(`/api/getBird?id=${commonCode}`)
@@ -91,13 +94,76 @@ const BirdDetail = () => {
       }
 
       setPhotos(photos.filter(photo => photo.id !== photoId))
-      
+
       if (bird) {
         setBird(prev => prev ? { ...prev, photoCount: prev.photoCount - 1 } : null)
       }
     } catch (error) {
       console.error('Error deleting photo:', error)
       throw error
+    }
+  }
+
+  const handleSetFeatured = async (fileId: string) => {
+    try {
+      const response = await fetch('/api/setFeaturedPhoto', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          birdId: bird?.id,
+          fileId: fileId,
+          userId: user?.uid
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to set featured photo')
+      }
+
+      toast.success('Featured photo updated successfully!')
+    } catch (error) {
+      console.error('Error setting featured photo:', error)
+      toast.error('Failed to set featured photo')
+      throw error
+    }
+  }
+
+  const handleEditPhotoSubmit = async (photoId: string, location: string, dateOfCapture: string) => {
+    try {
+      const response = await fetch('/api/editPhotoInfo', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, userId: user?.uid, location, dateOfCapture })
+      })
+      if (!response.ok) throw new Error('Failed to update photo')
+      
+      setPhotos(photos.map(p => p.id === photoId ? { ...p, location, dateOfCapture: new Date(dateOfCapture) } : p))
+      toast.success('Photo info updated successfully')
+    } catch (error) {
+      console.error('Error updating photo:', error)
+      toast.error('Failed to update photo')
+    }
+  }
+
+  const handleSwitchSpeciesSubmit = async (photoId: string, newBirdId: string) => {
+    try {
+      const response = await fetch('/api/switchPhotoSpecies', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, userId: user?.uid, oldBirdId: bird?.id, newBirdId })
+      })
+      if (!response.ok) throw new Error('Failed to switch species')
+      
+      setPhotos(photos.filter(p => p.id !== photoId))
+      if (bird) {
+        setBird(prev => prev ? { ...prev, photoCount: prev.photoCount - 1 } : null)
+      }
+      toast.success('Photo moved to new species successfully')
+    } catch (error) {
+      console.error('Error switching species:', error)
+      toast.error('Failed to move photo')
     }
   }
 
@@ -147,18 +213,19 @@ const BirdDetail = () => {
       }
 
       const result = await response.json()
-      
+
       const newPhoto: Photo = {
         id: result.photoId,
         url: result.url,
         location: result.location,
         dateOfCapture: new Date(result.dateOfCapture),
-        uploadedBy: user.uid,
-        uploadedByUsername: result.username
+        fileId: result.fileId,
+        userId: user.uid,
+        username: result.username
       }
-      
+
       setPhotos([newPhoto, ...photos])
-      
+
       if (bird) {
         setBird(prev => prev ? { ...prev, photoCount: prev.photoCount + 1 } : null)
       }
@@ -197,18 +264,18 @@ const BirdDetail = () => {
         <h1 className="font-display text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-bird-500 dark:from-primary-400 dark:to-bird-400 relative z-10">{bird.commonName}</h1>
         <p className="text-2xl text-slate-600 dark:text-slate-400 italic relative z-10 font-light">{bird.scientificName}</p>
         <div className="flex flex-wrap items-center justify-center pt-6 gap-4 relative z-10">
-            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-4 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner border border-slate-200 dark:border-slate-700/50">
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${IUCN_STATUS_MAP[bird.iucnStatus] ? IUCN_STATUS_MAP[bird.iucnStatus].color : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600'}`}>
-                {bird.iucnStatus}
-              </span>
-              <span className="text-sm">{IUCN_STATUS_MAP[bird.iucnStatus] ? IUCN_STATUS_MAP[bird.iucnStatus].label : 'IUCN'}</span>
-            </div>
-            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-4 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner border border-slate-200 dark:border-slate-700/50">
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm ${bird.isMigratory ? 'bg-pink-500 shadow-pink-500/30' : 'bg-blue-500 shadow-blue-500/30'}`}>
-                {bird.isMigratory? 'M': 'R'}
-              </span>
-              <span className="text-sm">{bird.isMigratory ? 'Migratory' : 'Resident'}</span>
-            </div>
+          <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-4 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner border border-slate-200 dark:border-slate-700/50">
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${IUCN_STATUS_MAP[bird.iucnStatus] ? IUCN_STATUS_MAP[bird.iucnStatus].color : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600'}`}>
+              {bird.iucnStatus}
+            </span>
+            <span className="text-sm">{IUCN_STATUS_MAP[bird.iucnStatus] ? IUCN_STATUS_MAP[bird.iucnStatus].label : 'IUCN'}</span>
+          </div>
+          <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-4 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner border border-slate-200 dark:border-slate-700/50">
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm ${bird.isMigratory ? 'bg-pink-500 shadow-pink-500/30' : 'bg-blue-500 shadow-blue-500/30'}`}>
+              {bird.isMigratory ? 'M' : 'R'}
+            </span>
+            <span className="text-sm">{bird.isMigratory ? 'Migratory' : 'Resident'}</span>
+          </div>
           <div className="flex items-center space-x-2 bg-slate-100 dark:bg-dark-surface px-5 py-2 rounded-full text-slate-700 dark:text-slate-300 font-medium shadow-inner">
             <Camera className="h-5 w-5 text-primary-500" />
             <span>{bird.photoCount} photo{bird.photoCount !== 1 ? 's' : ''}</span>
@@ -249,9 +316,13 @@ const BirdDetail = () => {
               url={photo.url}
               location={photo.location}
               dateOfCapture={photo.dateOfCapture}
-              uploadedBy={photo.uploadedBy}
-              uploadedByUsername={photo.uploadedByUsername}
+              userId={photo.userId}
+              username={photo.username}
+              fileId={photo.fileId}
               onDelete={handlePhotoDelete}
+              onSetFeatured={handleSetFeatured}
+              onEditInfo={(id) => setEditingPhoto(photos.find(p => p.id === id) || null)}
+              onSwitchSpecies={(id) => setSwitchingPhoto(photos.find(p => p.id === id) || null)}
             />
           ))}
         </div>
@@ -263,6 +334,24 @@ const BirdDetail = () => {
           onClose={() => setShowUploadModal(false)}
           onUpload={handlePhotoUpload}
           uploading={uploading}
+        />
+      )}
+
+      {/* Edit Photo Modal */}
+      {editingPhoto && (
+        <EditPhotoModal
+          photo={editingPhoto}
+          onClose={() => setEditingPhoto(null)}
+          onUpdate={handleEditPhotoSubmit}
+        />
+      )}
+
+      {/* Switch Species Modal */}
+      {switchingPhoto && (
+        <SwitchSpeciesModal
+          photo={switchingPhoto}
+          onClose={() => setSwitchingPhoto(null)}
+          onSwitch={handleSwitchSpeciesSubmit}
         />
       )}
     </div>
@@ -283,7 +372,7 @@ const UploadModal = ({ onClose, onUpload, uploading }: UploadModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!file || !location || !dateOfCapture) {
       toast.error('Please fill in all fields')
       return
@@ -391,3 +480,144 @@ const UploadModal = ({ onClose, onUpload, uploading }: UploadModalProps) => {
 }
 
 export default BirdDetail
+interface EditPhotoModalProps {
+  photo: Photo
+  onClose: () => void
+  onUpdate: (photoId: string, location: string, dateOfCapture: string) => Promise<void>
+}
+
+const EditPhotoModal = ({ photo, onClose, onUpdate }: EditPhotoModalProps) => {
+  const [location, setLocation] = useState(photo.location)
+  const [dateOfCapture, setDateOfCapture] = useState(photo.dateOfCapture.toISOString().split('T')[0])
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!location || !dateOfCapture) {
+      toast.error('Please fill in all fields')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await onUpdate(photo.id, location, dateOfCapture)
+      onClose()
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="glass rounded-2xl max-w-md w-full p-8 shadow-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-display font-bold text-slate-900 dark:text-white">Edit Photo Info</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-dark-surface">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Location</label>
+            <div className="relative group">
+              <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 h-5 w-5 transition-colors" />
+              <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="input-field pl-12" required />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Date of Capture</label>
+            <div className="relative group">
+              <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 h-5 w-5 transition-colors" />
+              <input type="date" value={dateOfCapture} onChange={(e) => setDateOfCapture(e.target.value)} className="input-field pl-12" required />
+            </div>
+          </div>
+          <div className="flex space-x-4 pt-6">
+            <button type="button" onClick={onClose} className="btn-secondary flex-1" disabled={submitting}>Cancel</button>
+            <button type="submit" disabled={submitting} className="btn-primary flex-1">
+              {submitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+interface SwitchSpeciesModalProps {
+  photo: Photo
+  onClose: () => void
+  onSwitch: (photoId: string, newBirdId: string) => Promise<void>
+}
+
+const SwitchSpeciesModal = ({ photo, onClose, onSwitch }: SwitchSpeciesModalProps) => {
+  const [birds, setBirds] = useState<any[]>([])
+  const [selectedBirdId, setSelectedBirdId] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    const fetchBirds = async () => {
+      try {
+        const response = await fetch('/api/getBirds')
+        if (response.ok) {
+          const data = await response.json()
+          setBirds(data.birds || [])
+        }
+      } catch (error) {
+        toast.error('Failed to load species list')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchBirds()
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedBirdId) {
+      toast.error('Please select a species')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await onSwitch(photo.id, selectedBirdId)
+      onClose()
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+      <div className="glass rounded-2xl max-w-md w-full p-8 shadow-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-display font-bold text-slate-900 dark:text-white">Switch Species</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-dark-surface">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+        {loading ? (
+          <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div></div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Target Species</label>
+              <div className="relative group">
+                <Bird className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 h-5 w-5 transition-colors" />
+                <select value={selectedBirdId} onChange={(e) => setSelectedBirdId(e.target.value)} className="input-field pl-12 bg-white dark:bg-dark-surface" required>
+                  <option value="" disabled>Select a species...</option>
+                  {birds.map(b => <option key={b.id} value={b.id}>{b.commonName} ({b.scientificName})</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="flex space-x-4 pt-6">
+              <button type="button" onClick={onClose} className="btn-secondary flex-1" disabled={submitting}>Cancel</button>
+              <button type="submit" disabled={submitting} className="btn-primary flex-1">
+                {submitting ? 'Switching...' : 'Switch Species'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}

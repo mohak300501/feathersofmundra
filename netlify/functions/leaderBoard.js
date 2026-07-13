@@ -17,12 +17,12 @@ exports.handler = async (event, context) => {
 
   try {
     const db = await connectToDatabase(context);
-    
+
     // Leaderboard for Photo Count
     const photoLeaders = await db.collection('photos').aggregate([
       {
         $group: {
-          _id: '$uploadedBy',
+          _id: '$userId',
           count: { $sum: 1 }
         }
       },

@@ -28,12 +28,12 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
+
     // Fetch the bird
     let bird;
     if (commonCode) {
-      bird = await db.collection('birds').findOne({ 
-        commonCode: { $regex: new RegExp(`^${commonCode}$`, 'i') } 
+      bird = await db.collection('birds').findOne({
+        commonCode: { $regex: new RegExp(`^${commonCode}$`, 'i') }
       });
     } else {
       let birdObjectId;
@@ -65,7 +65,7 @@ exports.handler = async (event, context) => {
       {
         $lookup: {
           from: 'users',
-          localField: 'uploadedBy',
+          localField: 'userId',
           foreignField: 'uid',
           as: 'user'
         }
@@ -74,16 +74,23 @@ exports.handler = async (event, context) => {
       {
         $project: {
           id: { $toString: '$_id' },
-          url: 1,
+          fileId: 1,
           location: 1,
           dateOfCapture: 1,
-          uploadedBy: 1,
-          uploadedByUsername: '$user.username',
-          uploadedAt: 1
+          userId: 1,
+          username: '$user.username',
+          addedAt: 1
         }
       },
-      { $sort: { uploadedAt: -1 } }
+      { $sort: { addedAt: -1 } }
     ]).toArray();
+
+    const formattedPhotos = photos.map(photo => {
+      return {
+        ...photo,
+        url: `/.netlify/functions/servePhoto?fileId=${photo.fileId}`,
+      };
+    });
 
     return {
       statusCode: 200,
@@ -95,7 +102,7 @@ exports.handler = async (event, context) => {
           id: bird._id.toString(),
           _id: undefined
         },
-        photos
+        photos: formattedPhotos
       }),
     };
 

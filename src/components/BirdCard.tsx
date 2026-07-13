@@ -7,7 +7,7 @@ interface BirdCardProps {
   commonName: string
   scientificName: string
   photoCount: number
-  featuredPhoto?: string
+  featuredPhoto: string
   commonCode: string
   iucnStatus: string
   isMigratory: boolean

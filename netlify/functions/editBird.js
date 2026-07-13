@@ -83,11 +83,10 @@ exports.handler = async (event, context) => {
         $set: {
           commonName: commonName.trim(),
           scientificName: scientificName.trim(),
-          familyId: familyId || null,
+          familyId: familyId,
           commonCode: commonCode,
-          iucnStatus: iucnStatus || 'LC',
-          isMigratory: Boolean(isMigratory),
-          updatedAt: new Date()
+          iucnStatus: iucnStatus,
+          isMigratory: Boolean(isMigratory)
         }
       }
     );

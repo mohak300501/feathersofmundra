@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { uid, email, username } = JSON.parse(event.body);
+    const { uid, email, username, whatsapp } = JSON.parse(event.body);
 
     if (!uid || !email) {
       return {
@@ -37,6 +37,7 @@ exports.handler = async (event, context) => {
         uid,
         email,
         username: username || email.split('@')[0],
+        whatsapp,
         isAdmin: false,
         createdAt: new Date()
       };
@@ -54,6 +55,7 @@ exports.handler = async (event, context) => {
           uid: userDoc.uid,
           email: userDoc.email,
           username: userDoc.username,
+          whatsapp: userDoc.whatsapp,
           isAdmin: userDoc.isAdmin
         }
       }),

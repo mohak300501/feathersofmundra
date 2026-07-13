@@ -1,4 +1,5 @@
 const { connectToDatabase } = require('./db');
+const { ObjectId } = require('mongodb');
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -16,9 +17,9 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const { familyName, familyOf, taxoPos, userId } = JSON.parse(event.body);
+    const { birdId, fileId, userId } = JSON.parse(event.body);
 
-    if (!familyName || !familyOf || taxoPos === undefined || !userId) {
+    if (!birdId || !fileId || !userId) {
       return {
         statusCode: 400,
         headers,
@@ -27,8 +28,8 @@ exports.handler = async (event, context) => {
     }
 
     const db = await connectToDatabase(context);
-    
-    // Check if user is admin
+
+    // Check if user exists and get permissions
     const userDoc = await db.collection('users').findOne({ uid: userId });
     if (!userDoc || !userDoc.isAdmin) {
       return {
@@ -38,44 +39,32 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Check if family already exists
-    const existingFamily = await db.collection('families').findOne({ 
-      familyName: { $regex: new RegExp(`^${familyName.trim()}$`, 'i') } 
-    });
+    const birdObjectId = new ObjectId(birdId);
 
-    if (existingFamily) {
+    // Check if bird exists
+    const birdDoc = await db.collection('birds').findOne({ _id: birdObjectId });
+    if (!birdDoc) {
       return {
-        statusCode: 409,
+        statusCode: 404,
         headers,
-        body: JSON.stringify({ error: 'Family with this name already exists' }),
+        body: JSON.stringify({ error: 'Bird not found' }),
       };
     }
 
-    // Convert comma separated string to array of strings
-    const familyOfArray = typeof familyOf === 'string' 
-      ? familyOf.split(',').map(s => s.trim()).filter(Boolean)
-      : Array.isArray(familyOf) ? familyOf : [];
-
-    const familyResult = await db.collection('families').insertOne({
-      familyName: familyName.trim(),
-      familyOf: familyOfArray,
-      taxoPos: Number(taxoPos)
-    });
+    // Set the featured photo
+    await db.collection('birds').updateOne(
+      { _id: birdObjectId },
+      { $set: { featuredPhoto: fileId } }
+    );
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({
-        success: true,
-        familyId: familyResult.insertedId.toString(),
-        familyName,
-        familyOf: familyOfArray,
-        taxoPos: Number(taxoPos)
-      }),
+      body: JSON.stringify({ success: true }),
     };
 
   } catch (error) {
-    console.error('Error adding family:', error);
+    console.error('Error setting featured photo:', error);
     return {
       statusCode: 500,
       headers,

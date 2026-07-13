@@ -63,6 +63,7 @@ exports.handler = async (event, context) => {
         id: bird._id.toString(),
         familyName: familyName,
         familyDisplay: familyDisplay,
+        featuredPhoto: bird.featuredPhoto ? `/.netlify/functions/servePhoto?fileId=${bird.featuredPhoto}` : null,
         taxoPos: bird.family ? bird.family.taxoPos : 9999,
         _id: undefined,
         family: undefined,

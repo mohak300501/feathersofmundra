@@ -49,7 +49,7 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ error: 'User not found' }),
       };
     }
-    
+
     // Check if bird exists
     let birdObjectId;
     try {
@@ -147,23 +147,21 @@ exports.handler = async (event, context) => {
     });
 
     const fileId = uploadResponse.data.id;
-    const proxyUrl = `${process.env.URL || ''}/.netlify/functions/servePhoto?fileId=${fileId}`;
 
     // Save to MongoDB Photos collection
     const photoResult = await db.collection('photos').insertOne({
       birdId: birdObjectId,
-      url: proxyUrl,
-      driveFileId: fileId,
+      fileId: fileId,
       location: location,
       dateOfCapture: new Date(dateOfCapture),
-      uploadedBy: userId, // Referencing user by UID
-      uploadedAt: new Date(),
+      userId: userId, // Referencing user by UID
+      addedAt: new Date(),
     });
 
     // Update bird's photo count and potentially featured photo
     const updateQuery = { $inc: { photoCount: 1 } };
     if (!birdDoc.featuredPhoto) {
-      updateQuery.$set = { featuredPhoto: proxyUrl };
+      updateQuery.$set = { featuredPhoto: fileId };
     }
     await db.collection('birds').updateOne({ _id: birdObjectId }, updateQuery);
 
@@ -173,7 +171,6 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: true,
         photoId: photoResult.insertedId.toString(),
-        url: proxyUrl,
         location: location,
         dateOfCapture: dateOfCapture,
         username: userDoc.username,

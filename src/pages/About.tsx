@@ -10,6 +10,33 @@ const About = () => (
     <p className="text-slate-800 dark:text-slate-200">
       Whether you are a seasoned birder or just starting out, we invite you to explore, contribute, and join our vibrant community!
     </p>
+    <p className="text-slate-800 dark:text-slate-200">
+      I made this website for showcasing bird photographs submitted by the citizens of Mundra. Feathers of Mundra is an engaging webapp that will help maintain a record of the avian biodiversity of Mundra, while capturing it through the lenses of this town's own photographers!
+    </p>
+
+    <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Features & Functionalities</h2>
+      <ul className="list-disc pl-5 space-y-2 text-slate-800 dark:text-slate-200">
+        <li><b>Bird Directory:</b> A comprehensive database of bird species found in Mundra, complete with detailed descriptions and IUCN conservation status.</li>
+        <li><b>Photo Submissions:</b> SignUped users can contribute their own bird photographs to the community.</li>
+        <li><b>User Profiles:</b> Manage your account, track your submissions, and appear on our community Leaderboard.</li>
+        <li><b>Admin Moderation:</b> Dedicated admin tools for reviewing submissions, managing species data, and maintaining the platform's quality.</li>
+      </ul>
+    </div>
+
+    <div className="mt-8">
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Tech Stack</h2>
+      <p className="text-slate-800 dark:text-slate-200 mb-4">
+        Built with modern web technologies to ensure a fast, responsive, and secure experience:
+      </p>
+      <ul className="list-disc pl-5 space-y-2 text-slate-800 dark:text-slate-200">
+        <li><b>Frontend:</b> React.js with Vite for fast builds and optimized performance.</li>
+        <li><b>Styling:</b> Tailwind CSS for a beautiful, responsive UI design, including full dark mode support.</li>
+        <li><b>Backend & APIs:</b> Netlify Serverless Functions for secure, scalable API endpoints.</li>
+        <li><b>Database:</b> MongoDB for robust, scalable data storage of users, birds, and photos.</li>
+        <li><b>Authentication:</b> Firebase Auth for secure user sign-up and login workflows.</li>
+      </ul>
+    </div>
   </div>
 )
 

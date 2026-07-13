@@ -1,23 +1,24 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Bird, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
+import { Bird, Mail, Lock, User, Eye, EyeOff, Phone } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const Register = () => {
+const SignUp = () => {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { register } = useAuth()
+  const { signup } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!username || !email || !password || !confirmPassword) {
       toast.error('Please fill in all fields')
       return
@@ -38,9 +39,29 @@ const Register = () => {
       return
     }
 
+    const phoneRegex = /^[0-9]{10}$/
+    if (!phoneRegex.test(whatsapp)) {
+      toast.error('Please enter a valid 10-digit WhatsApp number')
+      return
+    }
+
     setLoading(true)
     try {
-      await register(username, email, password)
+      // Check if username is already taken
+      const checkRes = await fetch('/api/checkUsername', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username })
+      });
+
+      const checkData = await checkRes.json();
+      if (!checkData.available) {
+        toast.error('Username is already taken');
+        setLoading(false);
+        return;
+      }
+
+      await signup(username, email, password, whatsapp)
       navigate('/')
     } catch (error) {
       console.error('Registration error:', error)
@@ -102,6 +123,25 @@ const Register = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="input-field pl-10"
                   placeholder="Enter your email"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="whatsapp" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                WhatsApp Mobile No.
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  id="whatsapp"
+                  name="whatsapp"
+                  type="text"
+                  required
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  className="input-field pl-10"
+                  placeholder="Enter your WhatsApp number"
                 />
               </div>
             </div>
@@ -182,7 +222,7 @@ const Register = () => {
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Already have an account?{' '}
               <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
-                Sign in here
+                Login here
               </Link>
             </p>
           </div>
@@ -198,4 +238,4 @@ const Register = () => {
   )
 }
 
-export default Register 
+export default SignUp 

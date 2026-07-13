@@ -12,12 +12,13 @@ import Terms from './pages/Terms'
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
-const Register = lazy(() => import('./pages/Register'))
+const SignUp = lazy(() => import('./pages/SignUp'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const BirdDetail = lazy(() => import('./pages/BirdDetail'))
 const AdminPanel = lazy(() => import('./pages/AdminPanel'))
 const LeaderBoard = lazy(() => import('./pages/LeaderBoard'))
 const CheckList = lazy(() => import('./pages/CheckList'))
+const Profile = lazy(() => import('./pages/Profile'))
 
 function App() {
   const { user, loading } = useAuth()
@@ -43,12 +44,15 @@ function App() {
             {!user && (
               <>
                 <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
               </>
             )}
             {user && (
-              <Route path="/admin" element={<AdminPanel />} />
+              <>
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/profile" element={<Profile />} />
+              </>
             )}
           </Routes>
         </Suspense>

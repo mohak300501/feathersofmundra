@@ -36,7 +36,7 @@ interface Bird {
   familyName: string
   familyDisplay: string
   photoCount: number
-  featuredPhoto?: string
+  featuredPhoto: string
   commonCode: string
   iucnStatus: string
   isMigratory: boolean

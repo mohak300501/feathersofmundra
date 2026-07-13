@@ -55,7 +55,7 @@ exports.handler = async (event, context) => {
     }
 
     // Check permissions
-    if (photoDoc.uploadedBy !== userId && !isAdmin) {
+    if (photoDoc.userId !== userId && !isAdmin) {
       return {
         statusCode: 403,
         headers,
@@ -63,8 +63,9 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Delete from Google Drive if driveFileId exists
-    if (photoDoc.driveFileId) {
+    // Delete from Google Drive if fileId exists
+    const fileIdToDelete = photoDoc.fileId;
+    if (fileIdToDelete) {
       try {
         const { google: googleApi } = google;
         const auth = new googleApi.auth.GoogleAuth({
@@ -75,9 +76,9 @@ exports.handler = async (event, context) => {
           scopes: ['https://www.googleapis.com/auth/drive'],
         });
         const drive = googleApi.drive({ version: 'v3', auth });
-        
+
         await drive.files.delete({
-          fileId: photoDoc.driveFileId,
+          fileId: fileIdToDelete,
           supportsAllDrives: true,
         });
       } catch (driveError) {
@@ -91,25 +92,25 @@ exports.handler = async (event, context) => {
 
     // Update bird's photo count and potentially featured photo
     const birdDoc = await db.collection('birds').findOne({ _id: birdObjectId });
-    
+
     const updateQuery = { $inc: { photoCount: -1 } };
-    
+
     // If the deleted photo was the featured photo, update it
-    if (birdDoc && birdDoc.featuredPhoto === photoDoc.url) {
+    if (birdDoc && birdDoc.featuredPhoto === photoDoc.fileId) {
       // Find the most recently uploaded photo for this bird to set as new featured
       const latestPhoto = await db.collection('photos')
         .find({ birdId: birdObjectId })
-        .sort({ uploadedAt: -1 })
+        .sort({ addedAt: -1 })
         .limit(1)
         .toArray();
-        
+
       if (latestPhoto.length > 0) {
-        updateQuery.$set = { featuredPhoto: latestPhoto[0].url };
+        updateQuery.$set = { featuredPhoto: latestPhoto[0].fileId };
       } else {
         updateQuery.$unset = { featuredPhoto: "" };
       }
     }
-    
+
     await db.collection('birds').updateOne({ _id: birdObjectId }, updateQuery);
 
     return {

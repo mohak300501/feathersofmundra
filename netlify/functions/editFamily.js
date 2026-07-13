@@ -75,8 +75,7 @@ exports.handler = async (event, context) => {
         $set: {
           familyName: familyName.trim(),
           familyOf: familyOfArray,
-          taxoPos: Number(taxoPos),
-          updatedAt: new Date()
+          taxoPos: Number(taxoPos)
         }
       }
     );

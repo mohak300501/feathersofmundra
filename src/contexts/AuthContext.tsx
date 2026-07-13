@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { 
-  User, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
+import {
+  User,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   sendEmailVerification,
   sendPasswordResetEmail
@@ -16,10 +16,12 @@ interface AuthContextType {
   loading: boolean
   isAdmin: boolean
   username: string | null
+  whatsapp: string | null
   login: (email: string, password: string) => Promise<void>
-  register: (username: string, email: string, password: string) => Promise<void>
+  signup: (username: string, email: string, password: string, whatsapp: string) => Promise<void>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
+  updateProfile: (newUsername: string, newWhatsapp: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -37,8 +39,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [username, setUsername] = useState<string | null>(null)
+  const [whatsapp, setWhatsapp] = useState<string | null>(null)
 
-  const syncUserWithBackend = async (firebaseUser: User, customUsername?: string) => {
+  const syncUserWithBackend = async (firebaseUser: User, customUsername?: string, customWhatsapp?: string) => {
     try {
       const response = await fetch('/api/syncUser', {
         method: 'POST',
@@ -46,22 +49,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({
           uid: firebaseUser.uid,
           email: firebaseUser.email,
-          username: customUsername || firebaseUser.email?.split('@')[0]
+          username: customUsername || firebaseUser.email?.split('@')[0],
+          whatsapp: customWhatsapp
         })
       });
-      
+
       const data = await response.json();
       if (data.success && data.user) {
         setUsername(data.user.username);
+        setWhatsapp(data.user.whatsapp);
         setIsAdmin(!!data.user.isAdmin);
       } else {
         console.error('Failed to sync user:', data.error, data.details || '')
         setUsername(null);
+        setWhatsapp(null);
         setIsAdmin(false);
       }
     } catch (error) {
       console.error('Error syncing user data:', error)
       setUsername(null)
+      setWhatsapp(null)
       setIsAdmin(false)
     }
   };
@@ -74,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setIsAdmin(false)
         setUsername(null)
+        setWhatsapp(null)
       }
       setLoading(false)
     })
@@ -97,21 +105,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const register = async (username: string, email: string, password: string) => {
+  const signup = async (username: string, email: string, password: string, whatsapp: string) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
       await sendEmailVerification(user)
-      
-      // Sync immediately on register to create the document
-      await syncUserWithBackend(user, username);
-      
+
+      // Sync immediately on signup to create the document
+      await syncUserWithBackend(user, username, whatsapp);
+
       toast.success('Registration successful! Please check your email to verify your account.')
       // Do not log in user immediately after registration
       await signOut(auth)
     } catch (error: any) {
       console.error('Registration error:', error)
-      toast.error(error.message || 'Failed to register')
+      toast.error(error.message || 'Failed to sign up')
       throw error
     }
   }
@@ -138,15 +146,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  const updateProfile = async (newUsername: string, newWhatsapp: string) => {
+    if (!user) throw new Error('Not authenticated')
+
+    try {
+      const response = await fetch('/api/updateProfile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid: user.uid,
+          username: newUsername,
+          whatsapp: newWhatsapp
+        })
+      });
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update profile');
+      }
+
+      setUsername(newUsername);
+      setWhatsapp(newWhatsapp);
+      toast.success('Profile updated successfully!');
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      toast.error(error.message || 'Failed to update profile');
+      throw error;
+    }
+  };
+
   const value = {
     user,
     loading,
     isAdmin,
     username,
+    whatsapp,
     login,
-    register,
+    signup,
     logout,
-    resetPassword
+    resetPassword,
+    updateProfile
   }
 
   return (
